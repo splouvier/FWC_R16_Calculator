@@ -1,9 +1,20 @@
+export type ReachByRound = {
+  R32: number;
+  R16: number;
+  QF: number;
+  SF: number;
+  F: number;
+  champion: number;
+};
+
 export type TeamStats = {
   title: number;
   reachR16: number;
   reachR32: number;
   groupWin: number;
+  runnerUp: number;
   expRound: number;
+  reachByRound: ReachByRound;
 };
 
 export type RoundMeeting = {
@@ -16,7 +27,11 @@ export type PairResult = {
   b: string;
   meet: number;
   byRound: Record<string, RoundMeeting>;
+  aWinIfMeet: number | null;
 };
+
+export type BoardEntry = { a: string; b: string; prob: number };
+export type Boards = { finals: BoardEntry[]; meetAnywhere: BoardEntry[] };
 
 export type Standing = { pts: number; gf: number; ga: number; gd: number };
 
@@ -31,6 +46,7 @@ export type SimResponse = {
   };
   teams: Record<string, TeamStats>;
   pair?: PairResult;
+  boards: Boards;
   standings: Record<string, Standing>;
   upcoming: Fixture[];
 };

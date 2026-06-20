@@ -213,25 +213,28 @@ def simulate(N, scenario, assets, state, seed=778899):
         raise ValueError(t)
 
     round_rank = {"R32": 1, "R16": 2, "QF": 3, "SF": 4, "F": 5}
+    final_home = final_away = None
     for k in ko:
         home = resolve(k["home"]); away = resolve(k["away"])
-        if k["round"] != "3P":
-            meetings.append((k["round"], k.get("venue"), home, away))
-            # both participants reached at least this round's entry level
-            entry = round_rank[k["round"]]
-            for arr in (home, away):
-                np.maximum.at(furthest, (np.arange(N), arr), entry)
         w = _winner(rng, home, away, ratings[home], ratings[away])
         l = np.where(w == home, away, home)
         winner_of[k["num"]] = w; loser_of[k["num"]] = l
+        if k["round"] != "3P":
+            # meeting log carries the winner so we can answer "if they meet, who wins?"
+            meetings.append((k["round"], k.get("venue"), home, away, w))
+            entry = round_rank[k["round"]]
+            for arr in (home, away):
+                np.maximum.at(furthest, (np.arange(N), arr), entry)
         if k["round"] == "F":
+            final_home, final_away = home, away
             champion = w
             np.maximum.at(furthest, (np.arange(N), w), 6)  # champion tier
 
     return {
         "N": N, "names": names, "idx": idx,
-        "pos1": pos1, "champion": champion, "furthest": furthest,
-        "meetings": meetings, "source": state["source"], "as_of": state["as_of"],
+        "pos1": pos1, "pos2": pos2, "champion": champion, "furthest": furthest,
+        "meetings": meetings, "final": (final_home, final_away),
+        "source": state["source"], "as_of": state["as_of"],
     }
 
 
@@ -314,24 +317,41 @@ def aggregate(sim, team_a=None, team_b=None):
     N = sim["N"]; names = sim["names"]; idx = sim["idx"]; furthest = sim["furthest"]
     champ = sim["champion"]
 
-    # per-team: title odds, advance% (reach R16+), expected furthest round, group-win%
-    title = np.bincount(champ, minlength=len(names)) / N
-    reach_r16 = (furthest >= 2).mean(axis=0)
-    reach_r32 = (furthest >= 1).mean(axis=0)
+    # per-team: title odds, reach-by-round, expected furthest round, finish-position odds
+    T = len(names)
+    title = np.bincount(champ, minlength=T) / N
+    reach = {  # cumulative P(reach at least round r)
+        "R32": (furthest >= 1).mean(axis=0),
+        "R16": (furthest >= 2).mean(axis=0),
+        "QF": (furthest >= 3).mean(axis=0),
+        "SF": (furthest >= 4).mean(axis=0),
+        "F": (furthest >= 5).mean(axis=0),
+    }
     exp_round = furthest.mean(axis=0)
-    group_win = np.zeros(len(names))
-    for g, arr in sim["pos1"].items():
-        gw = np.bincount(arr, minlength=len(names)) / N
-        group_win += gw
+    group_win = np.zeros(T)
+    for arr in sim["pos1"].values():
+        group_win += np.bincount(arr, minlength=T) / N
+    runner_up = np.zeros(T)
+    for arr in sim["pos2"].values():
+        runner_up += np.bincount(arr, minlength=T) / N
 
     teams_out = {}
     for n, i in idx.items():
         teams_out[n] = {
             "title": round(float(title[i]), 5),
-            "reachR16": round(float(reach_r16[i]), 5),
-            "reachR32": round(float(reach_r32[i]), 5),
+            "reachR16": round(float(reach["R16"][i]), 5),
+            "reachR32": round(float(reach["R32"][i]), 5),
             "groupWin": round(float(group_win[i]), 5),
+            "runnerUp": round(float(runner_up[i]), 5),
             "expRound": round(float(exp_round[i]), 4),
+            "reachByRound": {
+                "R32": round(float(reach["R32"][i]), 5),
+                "R16": round(float(reach["R16"][i]), 5),
+                "QF": round(float(reach["QF"][i]), 5),
+                "SF": round(float(reach["SF"][i]), 5),
+                "F": round(float(reach["F"][i]), 5),
+                "champion": round(float(title[i]), 5),
+            },
         }
 
     result = {
@@ -347,11 +367,13 @@ def aggregate(sim, team_a=None, team_b=None):
         ia, ib = idx[team_a], idx[team_b]
         by_round = {}
         total = np.zeros(N, dtype=bool)
-        for rnd, venue, home, away in sim["meetings"]:
+        a_wins = 0  # times A wins the meeting (across all rounds)
+        for rnd, venue, home, away, w in sim["meetings"]:
             hit = ((home == ia) & (away == ib)) | ((home == ib) & (away == ia))
             if not hit.any():
                 continue
             total |= hit
+            a_wins += int(((w == ia) & hit).sum())
             slot = by_round.setdefault(rnd, {"prob": 0.0, "venues": {}})
             slot["prob"] += float(hit.mean())
             if venue:
@@ -359,12 +381,49 @@ def aggregate(sim, team_a=None, team_b=None):
         for slot in by_round.values():
             slot["prob"] = round(slot["prob"], 5)
             slot["venues"] = {v: round(p, 5) for v, p in slot["venues"].items()}
+        meet_count = int(total.sum())
         result["pair"] = {
             "a": team_a, "b": team_b,
             "meet": round(float(total.mean()), 5),
             "byRound": by_round,
+            # conditional: given they meet, how often does A advance?
+            "aWinIfMeet": round(a_wins / meet_count, 5) if meet_count else None,
         }
+
+    # global leaderboards (independent of the selected pair)
+    result["boards"] = _leaderboards(sim, T)
     return result
+
+
+def _pair_counts(home, away, T):
+    """Vectorized count of unordered (home,away) pairs encoded as lo*T+hi."""
+    lo = np.minimum(home, away)
+    hi = np.maximum(home, away)
+    return np.bincount(lo * T + hi, minlength=T * T)
+
+
+def _top_pairs(counts, names, N, k):
+    out = []
+    for code in np.argsort(-counts)[:k]:
+        c = counts[code]
+        if c <= 0:
+            break
+        lo, hi = divmod(int(code), len(names))
+        out.append({"a": names[lo], "b": names[hi], "prob": round(float(c) / N, 5)})
+    return out
+
+
+def _leaderboards(sim, T):
+    names = sim["names"]
+    # most likely final matchups
+    fh, fa = sim["final"]
+    finals = _top_pairs(_pair_counts(fh, fa, T), names, sim["N"], 8) if fh is not None else []
+    # most likely meetings anywhere (each pair meets at most once per sim)
+    anywhere = np.zeros(T * T)
+    for _rnd, _venue, home, away, _w in sim["meetings"]:
+        anywhere += _pair_counts(home, away, T)
+    meetings = _top_pairs(anywhere, names, sim["N"], 12)
+    return {"finals": finals, "meetAnywhere": meetings}
 
 
 # --------------------------------------------------------------------------- #

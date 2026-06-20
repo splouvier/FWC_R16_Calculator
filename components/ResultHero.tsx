@@ -69,6 +69,30 @@ export default function ResultHero({
             </>
           )}
         </div>
+
+        {pair.aWinIfMeet != null && (
+          <div className="mt-5 max-w-md mx-auto">
+            <div className="eyebrow text-[10px] text-faint mb-1.5">If they meet, who advances?</div>
+            <div className="flex h-7 rounded-lg overflow-hidden border border-line">
+              <div
+                className="flex items-center justify-start px-2 text-[11px] font-semibold text-white"
+                style={{ width: `${pair.aWinIfMeet * 100}%`, background: accentA }}
+              >
+                {pair.aWinIfMeet >= 0.18 && `${Math.round(pair.aWinIfMeet * 100)}%`}
+              </div>
+              <div
+                className="flex items-center justify-end px-2 text-[11px] font-semibold text-white"
+                style={{ width: `${(1 - pair.aWinIfMeet) * 100}%`, background: accentB }}
+              >
+                {1 - pair.aWinIfMeet >= 0.18 && `${Math.round((1 - pair.aWinIfMeet) * 100)}%`}
+              </div>
+            </div>
+            <div className="flex justify-between mt-1 text-[11px] text-mute">
+              <span>{pair.a}</span>
+              <span>{pair.b}</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

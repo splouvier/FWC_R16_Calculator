@@ -12,7 +12,7 @@ export default function StandingsView({ data }: { data: SimResponse }) {
         the group</b> and to <b className="text-ink">reach the Round of 16</b>. Sorted by the
         model&apos;s order of finish.
       </p>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {GROUP_LETTERS.map((g) => {
           const rows = GROUPS[g]
             .map((name) => ({
