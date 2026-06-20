@@ -94,7 +94,7 @@ export default function TeamOddsCards({
   trends?: Record<string, Trend>;
 }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <Card name={aName} stats={aStats} accent={accentA} trend={trends?.[aName]} />
       <Card name={bName} stats={bStats} accent={accentB} trend={trends?.[bName]} />
     </div>

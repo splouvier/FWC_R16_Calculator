@@ -204,7 +204,7 @@ export default function App({ initialData }: { initialData?: SimResponse }) {
 
         {/* Team pickers (shown for the matchup-driven views) */}
         {(view === "simulate" || view === "bracket") && (
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] items-center max-w-4xl mx-auto mb-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_1fr] items-center max-w-4xl mx-auto mb-5">
             <TeamSelect
               value={teamA}
               onChange={(v) => changeTeam("a", v)}
@@ -245,7 +245,7 @@ export default function App({ initialData }: { initialData?: SimResponse }) {
                       accentB={accentB}
                       loading={loading}
                     />
-                    <div className="grid gap-5 lg:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                       <RoundBreakdown pair={data.pair} accentA={accentA} accentB={accentB} />
                       <ScenarioPanel
                         fixtures={relevantFixtures}

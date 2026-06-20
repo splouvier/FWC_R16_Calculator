@@ -37,7 +37,7 @@ export default function ViewSwitcher({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(v.key)}
-            className={`flex-1 shrink-0 display text-[11px] sm:text-sm rounded-full py-2 px-2.5 sm:px-1 whitespace-nowrap transition-all ${
+            className={`flex-1 min-w-0 truncate display text-[10px] sm:text-sm rounded-full py-2 px-1 sm:px-2 tracking-tight sm:tracking-normal whitespace-nowrap transition-all ${
               active ? "text-ink" : "text-faint hover:text-mute"
             }`}
             style={

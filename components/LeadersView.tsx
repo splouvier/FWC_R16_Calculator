@@ -23,7 +23,7 @@ export default function LeadersView({
       <section>
         <div className="eyebrow text-[11px] text-mute mb-1">Who wins it all</div>
         <h2 className="display text-2xl mb-4">Title race</h2>
-        <div className="grid gap-x-6 gap-y-0.5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-0.5 sm:grid-cols-2">
           {ranked.map((t, i) => {
             const accent = accentColor(t.name);
             return (
@@ -110,7 +110,7 @@ function Board({
       <div className="eyebrow text-[11px] text-mute mb-1">{eyebrow}</div>
       <h2 className="display text-2xl mb-1">{title}</h2>
       <p className="text-xs text-faint mb-4 max-w-xl">{note}</p>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {entries.map((e, i) => {
           const ca = accentColor(e.a);
           const cb = accentColor(e.b);

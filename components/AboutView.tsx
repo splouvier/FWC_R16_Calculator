@@ -236,14 +236,14 @@ function BracketFlow() {
     { label: "🏆", n: 1 },
   ];
   return (
-    <div className="card p-4 flex items-stretch justify-between gap-1 overflow-x-auto no-scrollbar">
+    <div className="card p-3 sm:p-4 flex items-stretch gap-0.5 sm:gap-1">
       {rounds.map((r, i) => (
-        <div key={r.label} className="flex items-center gap-1 shrink-0">
-          <div className="flex flex-col items-center gap-1 min-w-[44px]">
-            <div className="display text-base text-ink tnum">{r.n}</div>
-            <div className="eyebrow text-[9px] text-faint">{r.label}</div>
+        <div key={r.label} className="flex items-center gap-0.5 sm:gap-1 flex-1 min-w-0 last:flex-none">
+          <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+            <div className="display text-sm sm:text-base text-ink tnum">{r.n}</div>
+            <div className="eyebrow text-[8px] sm:text-[9px] leading-tight">{r.label}</div>
           </div>
-          {i < rounds.length - 1 && <span className="text-faint">→</span>}
+          {i < rounds.length - 1 && <span className="text-faint shrink-0">→</span>}
         </div>
       ))}
     </div>

@@ -19,7 +19,7 @@ export default function StandingsView({ data }: { data: SimResponse }) {
         group</b> and <b className="text-ink">reach the Round of 16</b>.{" "}
         <span className="text-faint">Tap any team for full odds and what-needs-to-happen.</span>
       </p>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
         {GROUP_LETTERS.map((g) => {
           const rows = GROUPS[g]
             .map((name) => ({

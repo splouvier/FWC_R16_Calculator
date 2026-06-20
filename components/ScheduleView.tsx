@@ -87,7 +87,7 @@ export default function ScheduleView({ teamA, teamB }: { teamA: string; teamB: s
                 )}
                 <span className="flex-1 h-px bg-line" />
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {day.matches.map((m, i) => (
                   <MatchRow key={i} m={m} mine={involvesMine(m)} dim={!!isPast && !m.score} />
                 ))}

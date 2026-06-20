@@ -119,7 +119,7 @@ export default function TeamDetail({
         </div>
       )}
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {/* projection funnel */}
         <div>
           <div className="eyebrow text-[10px] text-mute mb-2">How far they go</div>
