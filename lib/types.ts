@@ -83,6 +83,22 @@ export type SimResponse = {
 export type ForcedResult = { home: string; away: string; winner: string };
 export type Scenario = { forced: ForcedResult[] };
 
+export type SensOutcome = { winner: string; meet: number };
+export type SensGame = {
+  group: string;
+  home: string;
+  away: string;
+  outcomes: SensOutcome[];
+  swing: number;
+};
+export type SensitivityResponse = {
+  a: string;
+  b: string;
+  base: number | null;
+  sensitivity: SensGame[];
+  meta: { nSims: number; source: string; asOf: string | null };
+};
+
 // Display order + labels for knockout rounds.
 export const ROUND_ORDER = ["R32", "R16", "QF", "SF", "F"] as const;
 export const ROUND_LABEL: Record<string, string> = {

@@ -1,4 +1,4 @@
-import type { Scenario, SimResponse } from "./types";
+import type { Scenario, SimResponse, SensitivityResponse } from "./types";
 
 /**
  * Call the simulation API. Uses GET (cacheable) when there is no scenario,
@@ -24,6 +24,22 @@ export async function simulate(
     res = await fetch(`/api/simulate?${qs.toString()}`, { signal });
   }
   if (!res.ok) throw new Error(`Simulation failed (${res.status})`);
+  return res.json();
+}
+
+/** Rank upcoming games by how much they swing the dream meeting probability. */
+export async function fetchSensitivity(
+  a: string,
+  b: string,
+  signal?: AbortSignal,
+): Promise<SensitivityResponse> {
+  const res = await fetch("/api/simulate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ a, b, sensitivity: true }),
+    signal,
+  });
+  if (!res.ok) throw new Error(`Sensitivity failed (${res.status})`);
   return res.json();
 }
 

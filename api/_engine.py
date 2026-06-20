@@ -598,8 +598,66 @@ def _trends(current_teams, today):
     return out, base["date"]
 
 
+def _pair_meet(sim, a, b):
+    """Lightweight P(two teams meet) from a sim, without the full aggregate."""
+    ia, ib = sim["idx"][a], sim["idx"][b]
+    total = np.zeros(sim["N"], dtype=bool)
+    for _rnd, _num, _venue, _date, home, away, _w in sim["meetings"]:
+        total |= ((home == ia) & (away == ib)) | ((home == ib) & (away == ia))
+    return float(total.mean())
+
+
+_SENS_CACHE = {}
+SENS_SIMS = 8000  # lighter runs — we only need relative swings
+
+
+def serve_sensitivity(params):
+    """Rank upcoming games by how much they swing the dream meeting probability."""
+    assets = _assets_cached()
+    state = _state_cached()
+    bracket, teams, names, idx, ratings = assets
+    a = params.get("a") or "Canada"
+    b = params.get("b") or "Portugal"
+    meta = {"nSims": SENS_SIMS, "source": state["source"], "asOf": state["as_of"]}
+    if a not in idx or b not in idx or a == b:
+        return {"a": a, "b": b, "base": None, "sensitivity": [], "meta": meta}
+
+    key = json.dumps({"a": a, "b": b, "src": state["source"], "as": state["as_of"]}, sort_keys=True)
+    if key in _SENS_CACHE:
+        return _SENS_CACHE[key]
+
+    ga, gb = teams[a]["group"], teams[b]["group"]
+    # games in either team's group decide who wins the group (the main driver);
+    # put the two teams' own games first, then cap to bound the work.
+    relevant = [(grp, h, aw) for (grp, h, aw) in state["remaining"] if grp in (ga, gb)]
+    relevant.sort(key=lambda g: 0 if (g[1] in (a, b) or g[2] in (a, b)) else 1)
+    relevant = relevant[:6]
+
+    base_meet = _pair_meet(simulate(SENS_SIMS, None, assets, state), a, b)
+    rows = []
+    for grp, h, aw in relevant:
+        outs = []
+        for winner in (h, "draw", aw):
+            sc = {"forced": [{"home": h, "away": aw, "winner": winner}]}
+            meet = _pair_meet(simulate(SENS_SIMS, sc, assets, state), a, b)
+            outs.append({"winner": winner, "meet": round(meet, 5)})
+        vals = [o["meet"] for o in outs]
+        rows.append({
+            "group": grp, "home": h, "away": aw,
+            "outcomes": outs, "swing": round(max(vals) - min(vals), 5),
+        })
+    rows.sort(key=lambda r: -r["swing"])
+    out = {"a": a, "b": b, "base": round(base_meet, 5), "sensitivity": rows, "meta": meta}
+    if len(_SENS_CACHE) > 16:
+        _SENS_CACHE.clear()
+    _SENS_CACHE[key] = out
+    return out
+
+
 def serve(params):
     """params: {a, b, scenario, nSims}. Returns a JSON-able aggregate dict."""
+    if params.get("sensitivity"):
+        return serve_sensitivity(params)
     assets = _assets_cached()
     state = _state_cached()
     a = params.get("a") or "Canada"
