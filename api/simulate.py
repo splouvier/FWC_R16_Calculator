@@ -43,7 +43,7 @@ class handler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
-        self.send_header("Cache-Control", "public, max-age=120, s-maxage=300")
+        self.send_header("Cache-Control", "public, max-age=60, s-maxage=180")
         self.end_headers()
         self.wfile.write(body)
 

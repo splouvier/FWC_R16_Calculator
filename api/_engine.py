@@ -550,7 +550,7 @@ _ASSETS = None
 _STATE = None
 _STATE_AT = 0.0
 _SIM_CACHE = {}          # key -> sim dict (raw arrays)
-STATE_TTL = 600          # re-fetch live standings at most every 10 min per warm instance
+STATE_TTL = 300          # re-fetch live standings at most every 5 min per warm instance
 
 
 def _assets_cached():

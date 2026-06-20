@@ -5,7 +5,10 @@ name: Daily odds snapshot
 # redeploy so the live site always has fresh fallback data.
 on:
   schedule:
-    - cron: "20 9 * * *" # 09:20 UTC daily (after most match days settle)
+    # every 2 hours — openfootball auto-regenerates several times a day, so this
+    # keeps the committed snapshot/momentum/default in sync. Only commits when
+    # the data actually changed, so quiet windows produce no redeploy.
+    - cron: "0 */2 * * *"
   workflow_dispatch: {} # allow manual runs
 
 permissions:
