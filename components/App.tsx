@@ -168,12 +168,23 @@ export default function App({ initialData }: { initialData?: SimResponse }) {
     >
       <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 pb-20 pt-8 sm:pt-12">
         <header className="text-center mb-8">
-          <div className="eyebrow text-[11px] text-mute">FIFA World Cup 2026 · Knockout Explorer</div>
+          <div className="eyebrow text-[11px]">FIFA World Cup 2026 · Knockout Explorer</div>
           <h1
             className="display mt-2 leading-[0.95] px-2 text-balance"
-            style={{ fontSize: "clamp(28px, 7vw, 64px)" }}
+            style={{ fontSize: "clamp(30px, 7.5vw, 66px)" }}
           >
-            Road to the Final
+            <span
+              style={{
+                backgroundImage:
+                  "linear-gradient(100deg, #ffffff 18%, color-mix(in srgb, var(--accent-a) 55%, #ffffff) 55%, color-mix(in srgb, var(--accent-b) 60%, #ffffff) 90%)",
+                WebkitBackgroundClip: "text",
+                backgroundClip: "text",
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Road to the Final
+            </span>
           </h1>
           <p className="mx-auto mt-3 max-w-xl text-sm sm:text-base text-mute">
             Pick any two of the 48 teams and see the live, simulated odds they collide on the

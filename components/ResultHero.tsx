@@ -51,9 +51,14 @@ export default function ResultHero({
     <div
       className="card relative overflow-hidden p-6 sm:p-8 rise"
       style={{
-        background: `radial-gradient(120% 140% at 0% 0%, ${accentA}26, transparent 55%), radial-gradient(120% 140% at 100% 100%, ${accentB}26, transparent 55%), linear-gradient(180deg, var(--panel), var(--panel-2))`,
+        background: `radial-gradient(130% 150% at 0% 0%, ${accentA}33, transparent 56%), radial-gradient(130% 150% at 100% 100%, ${accentB}30, transparent 56%), linear-gradient(180deg, var(--panel-3), var(--panel-2))`,
       }}
     >
+      {/* soft top sheen */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{ background: `linear-gradient(90deg, transparent, ${accentA}, ${accentB}, transparent)` }}
+      />
       <div className="flex items-center justify-center gap-3 sm:gap-5 text-center">
         <Side flag={a?.flag} name={pair.a} accent={accentA} align="right" />
         <span className="display text-faint text-lg">×</span>
@@ -61,10 +66,19 @@ export default function ResultHero({
       </div>
 
       <div className="mt-6 text-center">
-        <div className="eyebrow text-[11px] text-mute">Chance they meet in the knockouts</div>
+        <div className="eyebrow text-[11px]">Chance they meet in the knockouts</div>
         <div
-          className={`display leading-none mt-2 tnum transition-opacity ${loading ? "opacity-40" : "opacity-100"}`}
-          style={{ fontSize: "clamp(64px, 18vw, 132px)" }}
+          key={`${pair.a}-${pair.b}`}
+          className={`display leading-none mt-2 tnum pop transition-opacity ${loading ? "opacity-50" : "opacity-100"}`}
+          style={{
+            fontSize: "clamp(64px, 18vw, 132px)",
+            backgroundImage: `linear-gradient(165deg, #ffffff 30%, color-mix(in srgb, ${accentA} 45%, #ffffff) 75%, color-mix(in srgb, ${accentB} 50%, #ffffff))`,
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+            WebkitTextFillColor: "transparent",
+            filter: `drop-shadow(0 8px 28px ${accentA}40)`,
+          }}
         >
           <AnimatedNumber value={pair.meet * 100} decimals={1} suffix="%" />
         </div>
