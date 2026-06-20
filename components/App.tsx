@@ -8,6 +8,7 @@ import ResultHero from "@/components/ResultHero";
 import RoundBreakdown from "@/components/RoundBreakdown";
 import TeamOddsCards from "@/components/TeamOddsCards";
 import ScenarioPanel, { type Choice, fxKey } from "@/components/ScenarioPanel";
+import SensitivityPanel from "@/components/SensitivityPanel";
 import StandingsView from "@/components/StandingsView";
 import BracketView from "@/components/BracketView";
 import LeadersView from "@/components/LeadersView";
@@ -254,6 +255,7 @@ export default function App({ initialData }: { initialData?: SimResponse }) {
                         trends={data.trends}
                       />
                     )}
+                    <SensitivityPanel teamA={teamA} teamB={teamB} />
                   </>
                 ) : (
                   <LoadingHero />
