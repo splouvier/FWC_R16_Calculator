@@ -26,9 +26,12 @@ export type PairResult = {
   a: string;
   b: string;
   meet: number;
+  meetCI: number;
   byRound: Record<string, RoundMeeting>;
   aWinIfMeet: number | null;
 };
+
+export type Trend = { title: number; groupWin: number; reachR16: number };
 
 export type BoardEntry = { a: string; b: string; prob: number };
 export type Boards = { finals: BoardEntry[]; meetAnywhere: BoardEntry[] };
@@ -43,12 +46,14 @@ export type SimResponse = {
     source: "live" | "snapshot";
     asOf: string | null;
     cached?: boolean;
+    trendSince?: string;
   };
   teams: Record<string, TeamStats>;
   pair?: PairResult;
   boards: Boards;
   standings: Record<string, Standing>;
   upcoming: Fixture[];
+  trends?: Record<string, Trend>;
 };
 
 export type ForcedResult = { home: string; away: string; winner: string };

@@ -1,8 +1,9 @@
 "use client";
 
 import AnimatedNumber from "./AnimatedNumber";
+import TrendArrow from "./TrendArrow";
 import { meta } from "@/lib/teams";
-import { type TeamStats } from "@/lib/types";
+import { type TeamStats, type Trend } from "@/lib/types";
 
 const EXP_LABEL = (v: number) => {
   // expRound: 0 group .. 6 champion. Map to a human label.
@@ -12,18 +13,41 @@ const EXP_LABEL = (v: number) => {
   ];
 };
 
-function Stat({ label, value, decimals = 0 }: { label: string; value: number; decimals?: number }) {
+function Stat({
+  label,
+  value,
+  decimals = 0,
+  trend,
+}: {
+  label: string;
+  value: number;
+  decimals?: number;
+  trend?: number;
+}) {
   return (
     <div className="flex items-baseline justify-between py-1.5 border-b border-line/60 last:border-0">
       <span className="text-xs text-mute">{label}</span>
-      <span className="display text-base text-ink">
-        <AnimatedNumber value={value * 100} decimals={decimals} suffix="%" />
+      <span className="flex items-baseline gap-1.5">
+        <TrendArrow delta={trend} />
+        <span className="display text-base text-ink">
+          <AnimatedNumber value={value * 100} decimals={decimals} suffix="%" />
+        </span>
       </span>
     </div>
   );
 }
 
-function Card({ name, stats, accent }: { name: string; stats: TeamStats; accent: string }) {
+function Card({
+  name,
+  stats,
+  accent,
+  trend,
+}: {
+  name: string;
+  stats: TeamStats;
+  accent: string;
+  trend?: Trend;
+}) {
   const m = meta(name);
   return (
     <div
@@ -41,9 +65,9 @@ function Card({ name, stats, accent }: { name: string; stats: TeamStats; accent:
         </span>
         <span className="ml-auto text-[10px] eyebrow text-faint">Group {m?.group}</span>
       </div>
-      <Stat label="Win the group" value={stats.groupWin} />
-      <Stat label="Reach Round of 16" value={stats.reachR16} />
-      <Stat label="Lift the trophy" value={stats.title} decimals={1} />
+      <Stat label="Win the group" value={stats.groupWin} trend={trend?.groupWin} />
+      <Stat label="Reach Round of 16" value={stats.reachR16} trend={trend?.reachR16} />
+      <Stat label="Lift the trophy" value={stats.title} decimals={1} trend={trend?.title} />
       <div className="flex items-baseline justify-between pt-2">
         <span className="text-xs text-mute">Expected finish</span>
         <span className="display text-sm text-ink">{EXP_LABEL(stats.expRound)}</span>
@@ -59,6 +83,7 @@ export default function TeamOddsCards({
   bStats,
   accentA,
   accentB,
+  trends,
 }: {
   aName: string;
   bName: string;
@@ -66,11 +91,12 @@ export default function TeamOddsCards({
   bStats: TeamStats;
   accentA: string;
   accentB: string;
+  trends?: Record<string, Trend>;
 }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Card name={aName} stats={aStats} accent={accentA} />
-      <Card name={bName} stats={bStats} accent={accentB} />
+      <Card name={aName} stats={aStats} accent={accentA} trend={trends?.[aName]} />
+      <Card name={bName} stats={bStats} accent={accentB} trend={trends?.[bName]} />
     </div>
   );
 }

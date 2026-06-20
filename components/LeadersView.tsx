@@ -2,6 +2,7 @@
 
 import { meta, accentColor } from "@/lib/teams";
 import { pct } from "@/lib/api";
+import TrendArrow from "./TrendArrow";
 import type { BoardEntry, SimResponse } from "@/lib/types";
 
 export default function LeadersView({
@@ -42,6 +43,9 @@ export default function LeadersView({
                 </span>
                 <span className="tnum text-xs font-semibold text-ink w-12 text-right">
                   {pct(t.title, 1)}
+                </span>
+                <span className="w-9 text-right">
+                  <TrendArrow delta={data.trends?.[t.name]?.title} />
                 </span>
               </button>
             );

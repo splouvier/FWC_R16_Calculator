@@ -104,3 +104,12 @@ select {
   -webkit-appearance: none;
   appearance: none;
 }
+
+/* hide scrollbars on the tab strip while keeping it scrollable */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

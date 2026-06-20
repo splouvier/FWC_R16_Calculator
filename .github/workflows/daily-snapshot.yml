@@ -1,0 +1,40 @@
+name: Daily odds snapshot
+
+# Refreshes the committed fallback data and appends a daily odds snapshot
+# (which powers the momentum / trend arrows). The commit triggers a Vercel
+# redeploy so the live site always has fresh fallback data.
+on:
+  schedule:
+    - cron: "20 9 * * *" # 09:20 UTC daily (after most match days settle)
+  workflow_dispatch: {} # allow manual runs
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install numpy
+
+      - name: Capture snapshot
+        run: python3 scripts/snapshot.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/history.json data/wc2026_snapshot.json
+          if git diff --cached --quiet; then
+            echo "No data changes today."
+          else
+            git commit -m "chore: daily odds snapshot ($(date -u +%Y-%m-%d))"
+            git push
+          fi

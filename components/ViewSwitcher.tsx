@@ -1,11 +1,18 @@
 "use client";
 
-export type ViewKey = "simulate" | "bracket" | "leaders" | "standings" | "about";
+export type ViewKey =
+  | "simulate"
+  | "bracket"
+  | "leaders"
+  | "schedule"
+  | "standings"
+  | "about";
 
 const VIEWS: { key: ViewKey; label: string }[] = [
   { key: "simulate", label: "Simulate" },
   { key: "bracket", label: "Bracket" },
   { key: "leaders", label: "Leaders" },
+  { key: "schedule", label: "Schedule" },
   { key: "standings", label: "Standings" },
   { key: "about", label: "Method" },
 ];
@@ -19,7 +26,7 @@ export default function ViewSwitcher({
 }) {
   return (
     <div
-      className="glass rounded-full p-1 flex w-full max-w-2xl mx-auto gap-0.5"
+      className="glass rounded-full p-1 flex w-full max-w-3xl mx-auto gap-0.5 overflow-x-auto no-scrollbar"
       role="tablist"
     >
       {VIEWS.map((v) => {
@@ -30,7 +37,7 @@ export default function ViewSwitcher({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(v.key)}
-            className={`flex-1 display text-[11px] sm:text-sm rounded-full py-2 px-1 transition-all ${
+            className={`flex-1 shrink-0 display text-[11px] sm:text-sm rounded-full py-2 px-2.5 sm:px-1 whitespace-nowrap transition-all ${
               active ? "text-ink" : "text-faint hover:text-mute"
             }`}
             style={

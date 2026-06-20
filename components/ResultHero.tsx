@@ -52,6 +52,11 @@ export default function ResultHero({
         >
           <AnimatedNumber value={pair.meet * 100} decimals={1} suffix="%" />
         </div>
+        {pair.meet > 0 && pair.meetCI != null && (
+          <div className="mt-1 text-[11px] text-faint tnum">
+            ± {(pair.meetCI * 100).toFixed(1)} pts (95% simulation margin)
+          </div>
+        )}
         <div className="mt-2 text-mute text-sm sm:text-base">
           {oneIn ? `About a 1 in ${oneIn} shot.` : "Effectively impossible from here."}
           {best && best.prob > 0 && (

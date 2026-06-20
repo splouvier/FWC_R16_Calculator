@@ -11,6 +11,7 @@ import ScenarioPanel, { type Choice, fxKey } from "@/components/ScenarioPanel";
 import StandingsView from "@/components/StandingsView";
 import BracketView from "@/components/BracketView";
 import LeadersView from "@/components/LeadersView";
+import ScheduleView from "@/components/ScheduleView";
 import AboutView from "@/components/AboutView";
 import { accentColor, TEAMS } from "@/lib/teams";
 import { simulate } from "@/lib/api";
@@ -60,7 +61,14 @@ export default function App() {
     const a = p.get("a");
     const b = p.get("b");
     const v = p.get("view");
-    const views: ViewKey[] = ["simulate", "bracket", "leaders", "standings", "about"];
+    const views: ViewKey[] = [
+      "simulate",
+      "bracket",
+      "leaders",
+      "schedule",
+      "standings",
+      "about",
+    ];
     if (a && TEAMS[a]) setTeamA(a);
     if (b && TEAMS[b] && b !== a) setTeamB(b);
     if (v && (views as string[]).includes(v)) setView(v as ViewKey);
@@ -241,6 +249,7 @@ export default function App() {
                         bStats={data.teams[teamB]}
                         accentA={accentA}
                         accentB={accentB}
+                        trends={data.trends}
                       />
                     )}
                   </>
@@ -277,6 +286,8 @@ export default function App() {
 
             {view === "leaders" &&
               (data ? <LeadersView data={data} onPickPair={pickPair} /> : <LoadingHero />)}
+
+            {view === "schedule" && <ScheduleView teamA={teamA} teamB={teamB} />}
 
             {view === "standings" && (data ? <StandingsView data={data} /> : <LoadingHero />)}
             {view === "about" && <AboutView data={data} />}

@@ -10,6 +10,7 @@ Pure-Python/NumPy; no framework. Importable for tests and runnable as a CLI:
 """
 from __future__ import annotations
 
+import datetime as _dt
 import json
 import math
 import os
@@ -36,12 +37,21 @@ def _find(rel):
     raise FileNotFoundError(rel)
 
 
+# Co-hosts play the bulk of their games at home; give them a modest, well-documented
+# rating bump to reflect real host overperformance (see the Method tab).
+HOST_NATIONS = {"Canada", "Mexico", "USA"}
+HOST_BONUS = 0.07
+
+
 def load_assets():
     bracket = json.load(open(_find(os.path.join("data", "bracket.json")), encoding="utf-8"))
     teams = json.load(open(_find(os.path.join("data", "teams.json")), encoding="utf-8"))["teams"]
     names = sorted(teams.keys())
     idx = {n: i for i, n in enumerate(names)}
-    ratings = np.array([teams[n]["rating"] for n in names], dtype=np.float64)
+    ratings = np.array(
+        [teams[n]["rating"] + (HOST_BONUS if n in HOST_NATIONS else 0.0) for n in names],
+        dtype=np.float64,
+    )
     return bracket, teams, names, idx, ratings
 
 
@@ -99,8 +109,13 @@ def fetch_state(idx, timeout=6):
 # Match model (ported & generalized from the legacy app)
 # --------------------------------------------------------------------------- #
 def _xg(diff):
-    """Expected goals for a team rated `diff` above its opponent."""
-    return np.maximum(0.18, 1.30 * np.exp(0.85 * diff))
+    """Expected goals for a team rated `diff` above its opponent.
+
+    Base rate 1.30 (≈ average goals-per-team in a balanced game); the exponent
+    controls how sharply a rating edge converts into goals. Floored at 0.18 so
+    even big underdogs always carry a puncher's chance.
+    """
+    return np.maximum(0.18, 1.30 * np.exp(0.92 * diff))
 
 
 def _sim_goals(rng, rate_a, rate_b):
@@ -382,9 +397,13 @@ def aggregate(sim, team_a=None, team_b=None):
             slot["prob"] = round(slot["prob"], 5)
             slot["venues"] = {v: round(p, 5) for v, p in slot["venues"].items()}
         meet_count = int(total.sum())
+        p_meet = float(total.mean())
+        # 95% Monte Carlo margin for the headline number (binomial standard error)
+        meet_se = (p_meet * (1 - p_meet) / N) ** 0.5
         result["pair"] = {
             "a": team_a, "b": team_b,
-            "meet": round(float(total.mean()), 5),
+            "meet": round(p_meet, 5),
+            "meetCI": round(1.96 * meet_se, 5),
             "byRound": by_round,
             # conditional: given they meet, how often does A advance?
             "aWinIfMeet": round(a_wins / meet_count, 5) if meet_count else None,
@@ -452,6 +471,36 @@ def _state_cached():
     return _STATE
 
 
+_HISTORY = None
+TREND_KEYS = ("title", "groupWin", "reachR16")
+
+
+def _load_history():
+    global _HISTORY
+    if _HISTORY is None:
+        try:
+            doc = json.load(open(_find(os.path.join("data", "history.json")), encoding="utf-8"))
+            _HISTORY = doc.get("snapshots", [])
+        except Exception:
+            _HISTORY = []
+    return _HISTORY
+
+
+def _trends(current_teams, today):
+    """Per-team change in odds vs the most recent snapshot from before today."""
+    prior = [s for s in _load_history() if s["date"] < today]
+    if not prior:
+        return None, None
+    base = prior[-1]
+    out = {}
+    for n, cur in current_teams.items():
+        b = base["teams"].get(n)
+        if not b:
+            continue
+        out[n] = {k: round(cur[k] - b.get(k, 0.0), 5) for k in TREND_KEYS}
+    return out, base["date"]
+
+
 def serve(params):
     """params: {a, b, scenario, nSims}. Returns a JSON-able aggregate dict."""
     assets = _assets_cached()
@@ -481,6 +530,12 @@ def serve(params):
         {"group": grp, "home": h, "away": aw}
         for (grp, h, aw) in state["remaining"]
     ]
+    # day-over-day momentum (only when we have a prior snapshot)
+    today = _dt.datetime.now(_dt.timezone.utc).date().isoformat()
+    trends, since = _trends(out["teams"], today)
+    if trends and not scenario:
+        out["trends"] = trends
+        out["meta"]["trendSince"] = since
     return out
 
 
