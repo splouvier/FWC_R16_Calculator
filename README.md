@@ -4,7 +4,7 @@ Pick any two of the 48 teams and see the live, simulated odds they meet on the r
 the Final — and exactly which round and venue it would happen in. Powered by a Monte Carlo
 engine that plays out the whole tournament tens of thousands of times.
 
-**Live:** https://fwc-r16-calculator.vercel.app
+**Live:** https://fwc26-road-to-the-final.vercel.app
 
 This started as a single hardcoded page answering one question ("will Canada meet Portugal
 in the July 7 Vancouver Round of 16?"). It's now a full app: any matchup, the entire

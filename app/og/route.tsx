@@ -54,7 +54,7 @@ export async function GET(req: Request) {
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", fontSize: 24, color: "#8a99a6" }}>
-            fwc-r16-calculator.vercel.app
+            fwc26-road-to-the-final.vercel.app
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             <span style={{ display: "flex", width: 60, height: 12, borderRadius: 6, backgroundColor: ca }} />

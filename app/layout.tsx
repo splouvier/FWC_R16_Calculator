@@ -14,7 +14,7 @@ const body = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://fwc-r16-calculator.vercel.app"),
+  metadataBase: new URL("https://fwc26-road-to-the-final.vercel.app"),
   title: "Road to the Final · World Cup 2026 Knockout Explorer",
   description:
     "Pick any two of the 48 teams and see the live, simulated odds of them meeting in the World Cup 2026 knockout rounds — powered by a 24,000-run Monte Carlo engine.",
