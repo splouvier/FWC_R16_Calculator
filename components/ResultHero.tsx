@@ -1,7 +1,6 @@
 "use client";
 
 import AnimatedNumber from "./AnimatedNumber";
-import VenueSilhouette from "./VenueSilhouette";
 import { meta } from "@/lib/teams";
 import { ROUND_LABEL, type PairResult } from "@/lib/types";
 
@@ -60,16 +59,13 @@ export default function ResultHero({
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{ background: `linear-gradient(90deg, transparent, ${accentA}, ${accentB}, transparent)` }}
       />
-      {best && best.prob > 0 && (
-        <VenueSilhouette venue={best.venue} accentA={accentA} accentB={accentB} />
-      )}
-      <div className="relative z-10 flex items-center justify-center gap-3 sm:gap-5 text-center">
+      <div className="flex items-center justify-center gap-3 sm:gap-5 text-center">
         <Side flag={a?.flag} name={pair.a} accent={accentA} align="right" />
         <span className="display text-faint text-lg">×</span>
         <Side flag={b?.flag} name={pair.b} accent={accentB} align="left" />
       </div>
 
-      <div className="relative z-10 mt-6 text-center">
+      <div className="mt-6 text-center">
         <div className="eyebrow text-[11px]">Chance they meet in the knockouts</div>
         <div
           key={`${pair.a}-${pair.b}`}
