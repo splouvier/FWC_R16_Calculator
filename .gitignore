@@ -46,3 +46,6 @@ next-env.d.ts
 # python
 __pycache__/
 *.pyc
+
+# scratch/test scripts
+_*.mjs
