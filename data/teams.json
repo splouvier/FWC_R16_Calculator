@@ -1,0 +1,64 @@
+{
+  "_note": "rating = attack-strength on the legacy scale (~0.9 weakest .. ~1.7 strongest); used by xg(). Anchored to the original 8 hardcoded values; others Elo/ranking-tiered. Colors are national-kit primary/secondary for dynamic UI theming.",
+  "teams": {
+    "Mexico":               { "group": "A", "flag": "🇲🇽", "primary": "#006341", "secondary": "#C8102E", "rating": 1.44 },
+    "South Africa":         { "group": "A", "flag": "🇿🇦", "primary": "#007749", "secondary": "#FFB81C", "rating": 1.16 },
+    "Czech Republic":       { "group": "A", "flag": "🇨🇿", "primary": "#11457E", "secondary": "#D7141A", "rating": 1.30 },
+    "South Korea":          { "group": "A", "flag": "🇰🇷", "primary": "#C8102E", "secondary": "#003478", "rating": 1.36 },
+
+    "Canada":               { "group": "B", "flag": "🇨🇦", "primary": "#D81E22", "secondary": "#FFFFFF", "rating": 1.40 },
+    "Switzerland":          { "group": "B", "flag": "🇨🇭", "primary": "#D52B1E", "secondary": "#FFFFFF", "rating": 1.55 },
+    "Bosnia & Herzegovina": { "group": "B", "flag": "🇧🇦", "primary": "#002F6C", "secondary": "#FECB00", "rating": 1.22 },
+    "Qatar":                { "group": "B", "flag": "🇶🇦", "primary": "#8A1538", "secondary": "#FFFFFF", "rating": 1.05 },
+
+    "Brazil":               { "group": "C", "flag": "🇧🇷", "primary": "#009C3B", "secondary": "#FFDF00", "rating": 1.63 },
+    "Morocco":              { "group": "C", "flag": "🇲🇦", "primary": "#C1272D", "secondary": "#006233", "rating": 1.50 },
+    "Scotland":             { "group": "C", "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "primary": "#0065BD", "secondary": "#FFFFFF", "rating": 1.32 },
+    "Haiti":                { "group": "C", "flag": "🇭🇹", "primary": "#00209F", "secondary": "#D21034", "rating": 1.00 },
+
+    "USA":                  { "group": "D", "flag": "🇺🇸", "primary": "#0A3161", "secondary": "#B31942", "rating": 1.45 },
+    "Paraguay":             { "group": "D", "flag": "🇵🇾", "primary": "#D52B1E", "secondary": "#0038A8", "rating": 1.30 },
+    "Turkey":               { "group": "D", "flag": "🇹🇷", "primary": "#E30A17", "secondary": "#FFFFFF", "rating": 1.38 },
+    "Australia":            { "group": "D", "flag": "🇦🇺", "primary": "#00843D", "secondary": "#FFCD00", "rating": 1.34 },
+
+    "Germany":              { "group": "E", "flag": "🇩🇪", "primary": "#000000", "secondary": "#DD0000", "rating": 1.60 },
+    "Ecuador":              { "group": "E", "flag": "🇪🇨", "primary": "#FFD100", "secondary": "#034EA2", "rating": 1.42 },
+    "Ivory Coast":          { "group": "E", "flag": "🇨🇮", "primary": "#F77F00", "secondary": "#009E60", "rating": 1.34 },
+    "Curaçao":              { "group": "E", "flag": "🇨🇼", "primary": "#002B7F", "secondary": "#F9E814", "rating": 0.98 },
+
+    "Netherlands":          { "group": "F", "flag": "🇳🇱", "primary": "#FF6900", "secondary": "#21468B", "rating": 1.57 },
+    "Japan":                { "group": "F", "flag": "🇯🇵", "primary": "#0033A0", "secondary": "#BC002D", "rating": 1.46 },
+    "Sweden":               { "group": "F", "flag": "🇸🇪", "primary": "#006AA7", "secondary": "#FECC00", "rating": 1.38 },
+    "Tunisia":              { "group": "F", "flag": "🇹🇳", "primary": "#E70013", "secondary": "#FFFFFF", "rating": 1.20 },
+
+    "Belgium":              { "group": "G", "flag": "🇧🇪", "primary": "#E30613", "secondary": "#FDDA24", "rating": 1.54 },
+    "Egypt":                { "group": "G", "flag": "🇪🇬", "primary": "#CE1126", "secondary": "#000000", "rating": 1.34 },
+    "Iran":                 { "group": "G", "flag": "🇮🇷", "primary": "#239F40", "secondary": "#DA0000", "rating": 1.34 },
+    "New Zealand":          { "group": "G", "flag": "🇳🇿", "primary": "#000000", "secondary": "#FFFFFF", "rating": 1.06 },
+
+    "Spain":                { "group": "H", "flag": "🇪🇸", "primary": "#C60B1E", "secondary": "#FFC400", "rating": 1.65 },
+    "Uruguay":              { "group": "H", "flag": "🇺🇾", "primary": "#5CBFEB", "secondary": "#001489", "rating": 1.52 },
+    "Saudi Arabia":         { "group": "H", "flag": "🇸🇦", "primary": "#006C35", "secondary": "#FFFFFF", "rating": 1.14 },
+    "Cape Verde":           { "group": "H", "flag": "🇨🇻", "primary": "#003893", "secondary": "#CF2027", "rating": 1.08 },
+
+    "France":               { "group": "I", "flag": "🇫🇷", "primary": "#0055A4", "secondary": "#EF4135", "rating": 1.66 },
+    "Senegal":              { "group": "I", "flag": "🇸🇳", "primary": "#00853F", "secondary": "#FDEF42", "rating": 1.48 },
+    "Norway":               { "group": "I", "flag": "🇳🇴", "primary": "#BA0C2F", "secondary": "#00205B", "rating": 1.42 },
+    "Iraq":                 { "group": "I", "flag": "🇮🇶", "primary": "#007A3D", "secondary": "#CE1126", "rating": 1.04 },
+
+    "Argentina":            { "group": "J", "flag": "🇦🇷", "primary": "#75AADB", "secondary": "#FFFFFF", "rating": 1.66 },
+    "Austria":              { "group": "J", "flag": "🇦🇹", "primary": "#ED2939", "secondary": "#FFFFFF", "rating": 1.42 },
+    "Algeria":              { "group": "J", "flag": "🇩🇿", "primary": "#006233", "secondary": "#FFFFFF", "rating": 1.28 },
+    "Jordan":               { "group": "J", "flag": "🇯🇴", "primary": "#007A3D", "secondary": "#CE1126", "rating": 1.02 },
+
+    "Portugal":             { "group": "K", "flag": "🇵🇹", "primary": "#1C7C3B", "secondary": "#DA291C", "rating": 1.60 },
+    "Colombia":             { "group": "K", "flag": "🇨🇴", "primary": "#FCD116", "secondary": "#003893", "rating": 1.46 },
+    "DR Congo":             { "group": "K", "flag": "🇨🇩", "primary": "#007FFF", "secondary": "#F7D618", "rating": 1.18 },
+    "Uzbekistan":           { "group": "K", "flag": "🇺🇿", "primary": "#1EB53A", "secondary": "#0099B5", "rating": 0.98 },
+
+    "England":              { "group": "L", "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "primary": "#FFFFFF", "secondary": "#CE1124", "rating": 1.63 },
+    "Croatia":              { "group": "L", "flag": "🇭🇷", "primary": "#FF0000", "secondary": "#171796", "rating": 1.52 },
+    "Ghana":                { "group": "L", "flag": "🇬🇭", "primary": "#006B3F", "secondary": "#FCD116", "rating": 1.26 },
+    "Panama":               { "group": "L", "flag": "🇵🇦", "primary": "#005293", "secondary": "#DA121A", "rating": 1.10 }
+  }
+}

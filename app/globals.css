@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/* ---------- design tokens ---------- */
+:root {
+  --bg: #060912;
+  --bg-2: #0b1120;
+  --panel: #111a2e;
+  --panel-2: #0d1424;
+  --line: #1e2a44;
+  --ink: #f2f6ff;
+  --mute: #97a6c2;
+  --faint: #5e6e8f;
+  /* dynamic team accents — overridden inline from selected teams */
+  --accent-a: #d81e22;
+  --accent-b: #1c7c3b;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-mute: var(--mute);
+  --color-faint: var(--faint);
+  --color-accent-a: var(--accent-a);
+  --color-accent-b: var(--accent-b);
+  --font-display: var(--font-display), "Oswald", system-ui, sans-serif;
+  --font-body: var(--font-body), "Inter", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 15% -10%, color-mix(in srgb, var(--accent-a) 16%, transparent), transparent 60%),
+    radial-gradient(1100px 600px at 100% 0%, color-mix(in srgb, var(--accent-b) 14%, transparent), transparent 55%),
+    linear-gradient(180deg, var(--bg-2), var(--bg) 40%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- reusable bits ---------- */
+.display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+.eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+}
+.card {
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+.glass {
+  background: color-mix(in srgb, var(--panel) 70%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+}
+
+/* meter fill animation */
+.meter {
+  background: #0a1120;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.meter > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 0.5s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* native select cosmetics */
+select {
+  -webkit-appearance: none;
+  appearance: none;
+}
