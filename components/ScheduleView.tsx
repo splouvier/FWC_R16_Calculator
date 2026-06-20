@@ -37,6 +37,9 @@ export default function ScheduleView({ teamA, teamB }: { teamA: string; teamB: s
     [m.team1, m.team2].some((t) => t === teamA || t === teamB);
 
   const filtered = days
+    // forward-only: today's games through the Final (drops past match days).
+    // Before `today` resolves on mount we show everything, then it narrows.
+    .filter((d) => !today || d.date >= today)
     .map((d) => ({
       date: d.date,
       matches: d.matches.filter((m) =>
@@ -67,35 +70,42 @@ export default function ScheduleView({ teamA, teamB }: { teamA: string; teamB: s
             </button>
           ))}
         </div>
-        <span className="text-xs text-faint">{filtered.reduce((n, d) => n + d.matches.length, 0)} matches</span>
+        <span className="text-xs text-faint">
+          {filtered.reduce((n, d) => n + d.matches.length, 0)} matches left
+        </span>
       </div>
 
-      <div className="space-y-6">
-        {filtered.map((day) => {
-          const isToday = day.date === today;
-          const isPast = today && day.date < today;
-          return (
-            <div key={day.date}>
-              <div className="flex items-center gap-2 mb-2 sticky top-0 py-1 z-10" style={{ background: "linear-gradient(180deg, var(--bg) 60%, transparent)" }}>
-                <span className={`display text-sm ${isToday ? "text-ink" : "text-mute"}`}>
-                  {fmtDate(day.date)}
-                </span>
-                {isToday && (
-                  <span className="eyebrow text-[9px] px-2 py-0.5 rounded-full text-ink" style={{ background: "var(--accent-a)" }}>
-                    Today
+      {filtered.length === 0 ? (
+        <div className="card p-8 text-center text-sm text-mute">
+          No matches left for this filter — the road ends here. 🏆
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {filtered.map((day) => {
+            const isToday = day.date === today;
+            return (
+              <div key={day.date}>
+                <div className="flex items-center gap-2 mb-2 sticky top-0 py-1 z-10" style={{ background: "linear-gradient(180deg, var(--bg) 60%, transparent)" }}>
+                  <span className={`display text-sm ${isToday ? "text-ink" : "text-mute"}`}>
+                    {fmtDate(day.date)}
                   </span>
-                )}
-                <span className="flex-1 h-px bg-line" />
+                  {isToday && (
+                    <span className="eyebrow text-[9px] px-2 py-0.5 rounded-full text-ink" style={{ background: "var(--accent-a)" }}>
+                      Today
+                    </span>
+                  )}
+                  <span className="flex-1 h-px bg-line" />
+                </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {day.matches.map((m, i) => (
+                    <MatchRow key={i} m={m} mine={involvesMine(m)} dim={false} />
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {day.matches.map((m, i) => (
-                  <MatchRow key={i} m={m} mine={involvesMine(m)} dim={!!isPast && !m.score} />
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
