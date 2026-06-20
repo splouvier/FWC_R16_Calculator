@@ -4,6 +4,7 @@ import type { SimResponse } from "@/lib/types";
 
 export default function AboutView({ data }: { data: SimResponse | null }) {
   const nSims = (data?.meta.nSims ?? 24000).toLocaleString();
+  const cal = data?.calibration;
   return (
     <div className="rise max-w-3xl mx-auto space-y-10">
       <header>
@@ -18,6 +19,24 @@ export default function AboutView({ data }: { data: SimResponse | null }) {
           <i>how often</i> that thing happened across every simulated tournament.
         </p>
       </header>
+
+      {cal && cal.n > 0 && (
+        <section className="card p-5">
+          <div className="eyebrow text-[11px] text-mute mb-3">
+            Track record · {cal.n} games played so far
+          </div>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <Metric label="Called correctly" value={pctText(cal.accuracy)} />
+            <Metric label="Favourites won" value={pctText(cal.favWinRate)} />
+            <Metric label="Brier score" value={cal.brier?.toFixed(2) ?? "—"} hint="lower is better" />
+          </div>
+          {cal.buckets && cal.buckets.length > 0 && <Reliability buckets={cal.buckets} />}
+          <p className="text-xs text-faint mt-3">
+            When the model said an outcome was likely, did it happen that often? Dots near the
+            dashed line mean the probabilities are well-calibrated.
+          </p>
+        </section>
+      )}
 
       <Step n={1} title="Stronger teams score more — but not always">
         <p>
@@ -117,6 +136,47 @@ function Step({ n, title, children }: { n: number; title: string; children: Reac
 
 function Caption({ children }: { children: React.ReactNode }) {
   return <p className="text-xs text-faint mt-2">{children}</p>;
+}
+
+function pctText(v: number | null | undefined) {
+  return v == null ? "—" : `${Math.round(v * 100)}%`;
+}
+
+function Metric({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="text-center">
+      <div className="display text-2xl text-ink tnum">{value}</div>
+      <div className="text-[11px] text-mute mt-0.5">{label}</div>
+      {hint && <div className="text-[9px] text-faint">{hint}</div>}
+    </div>
+  );
+}
+
+/** Reliability diagram: dots at (predicted, actual); the dashed diagonal is perfect. */
+function Reliability({ buckets }: { buckets: { predicted: number; actual: number; n: number }[] }) {
+  const S = 150;
+  const pad = 14;
+  const px = (v: number) => pad + v * (S - 2 * pad);
+  const py = (v: number) => S - pad - v * (S - 2 * pad);
+  const maxN = Math.max(...buckets.map((b) => b.n));
+  return (
+    <svg viewBox={`0 0 ${S} ${S}`} className="w-full max-w-[200px] mx-auto block" role="img" aria-label="Calibration reliability diagram">
+      <rect x={pad} y={pad} width={S - 2 * pad} height={S - 2 * pad} fill="none" stroke="var(--line)" />
+      <line x1={px(0)} y1={py(0)} x2={px(1)} y2={py(1)} stroke="var(--faint)" strokeDasharray="3 3" />
+      {buckets.map((b, i) => (
+        <circle
+          key={i}
+          cx={px(b.predicted)}
+          cy={py(b.actual)}
+          r={3 + 4 * (b.n / maxN)}
+          fill="var(--accent-a)"
+          fillOpacity={0.8}
+        />
+      ))}
+      <text x={px(0.5)} y={S - 1} textAnchor="middle" fontSize="8" fill="var(--faint)">predicted →</text>
+      <text x={3} y={py(0.5)} fontSize="8" fill="var(--faint)" transform={`rotate(-90 3 ${py(0.5)})`} textAnchor="middle">actual →</text>
+    </svg>
+  );
 }
 
 /* ---------- graphics ---------- */

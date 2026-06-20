@@ -40,6 +40,21 @@ export type PairResult = {
 
 export type Trend = { title: number; groupWin: number; reachR16: number };
 
+export type CalibrationBucket = { predicted: number; actual: number; n: number };
+export type Calibration = {
+  n: number;
+  accuracy?: number;
+  brier?: number;
+  favWinRate?: number | null;
+  buckets?: CalibrationBucket[];
+};
+
+export type HistorySnapshot = {
+  date: string;
+  asOf: string | null;
+  teams: Record<string, { title: number; groupWin: number; reachR16: number }>;
+};
+
 export type BoardEntry = { a: string; b: string; prob: number };
 export type Boards = { finals: BoardEntry[]; meetAnywhere: BoardEntry[] };
 
@@ -61,6 +76,8 @@ export type SimResponse = {
   standings: Record<string, Standing>;
   upcoming: Fixture[];
   trends?: Record<string, Trend>;
+  calibration?: Calibration;
+  history?: HistorySnapshot[];
 };
 
 export type ForcedResult = { home: string; away: string; winner: string };

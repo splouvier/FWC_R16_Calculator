@@ -17,7 +17,7 @@ import { accentColor, TEAMS } from "@/lib/teams";
 import { simulate } from "@/lib/api";
 import type { ForcedResult, SimResponse } from "@/lib/types";
 
-export default function App() {
+export default function App({ initialData }: { initialData?: SimResponse }) {
   // Start from defaults so SSR and the first client render match; apply any URL
   // params after mount (below) to avoid a hydration mismatch.
   const [view, setView] = useState<ViewKey>("simulate");
@@ -25,8 +25,10 @@ export default function App() {
   const [teamB, setTeamB] = useState("Portugal");
   const [urlReady, setUrlReady] = useState(false);
   const [choices, setChoices] = useState<Record<string, Choice>>({});
-  const [data, setData] = useState<SimResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Seed with the precomputed default so the first paint isn't blank; the mount
+  // fetch refreshes it (and swaps to a different pair if the URL asks for one).
+  const [data, setData] = useState<SimResponse | null>(initialData ?? null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 

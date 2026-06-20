@@ -25,12 +25,16 @@ import _engine as E  # noqa: E402
 
 HISTORY = os.path.join(ROOT, "data", "history.json")
 SNAPSHOT = os.path.join(ROOT, "data", "wc2026_snapshot.json")
+DEFAULT_SIM = os.path.join(ROOT, "data", "default-sim.json")
 KEEP_KEYS = ("title", "groupWin", "reachR16")
 
 
 def build_state_from_doc(doc, idx):
-    played, remaining, as_of = E._parse_openfootball(doc, idx)
-    return {"played": played, "remaining": remaining, "as_of": as_of, "source": "file"}
+    played, remaining, completed, as_of = E._parse_openfootball(doc, idx)
+    return {
+        "played": played, "remaining": remaining, "completed": completed,
+        "as_of": as_of, "source": "file",
+    }
 
 
 def main():
@@ -80,6 +84,13 @@ def main():
     if live_doc is not None:
         json.dump(live_doc, open(SNAPSHOT, "w", encoding="utf-8"), ensure_ascii=False)
         print("snapshot: refreshed data/wc2026_snapshot.json")
+
+    # precompute the default response so the page can render instantly (no cold
+    # serverless call on first paint); the live fetch refreshes it on mount.
+    E._STATE = None  # force serve() to use fresh state consistent with this run
+    default_out = E.serve({"a": "Canada", "b": "Portugal"})
+    json.dump(default_out, open(DEFAULT_SIM, "w", encoding="utf-8"), ensure_ascii=False)
+    print("wrote data/default-sim.json")
 
 
 if __name__ == "__main__":

@@ -59,12 +59,14 @@ def load_assets():
 # Live data: current standings + remaining group fixtures
 # --------------------------------------------------------------------------- #
 def _parse_openfootball(doc, idx):
-    """Return (played_stats, remaining_fixtures, as_of).
+    """Return (played_stats, remaining_fixtures, completed_results, as_of).
 
-    played_stats[name] = [pts, gf, ga]; remaining = list of (group, home, away).
+    played_stats[name] = [pts, gf, ga]; remaining = list of (group, home, away);
+    completed = list of (home, away, hg, ag) for finished group games (for calibration).
     """
     played = {n: [0, 0, 0] for n in idx}
     remaining = []
+    completed = []
     as_of = None
     for m in doc["matches"]:
         g = m.get("group")
@@ -85,11 +87,12 @@ def _parse_openfootball(doc, idx):
                 played[a][0] += 3
             else:
                 played[h][0] += 1; played[a][0] += 1
+            completed.append((h, a, hg, ag))
             if m.get("date"):
                 as_of = m["date"] if not as_of else max(as_of, m["date"])
         else:
             remaining.append((group, h, a))
-    return played, remaining, as_of
+    return played, remaining, completed, as_of
 
 
 def fetch_state(idx, timeout=6):
@@ -101,8 +104,11 @@ def fetch_state(idx, timeout=6):
     except Exception:
         source = "snapshot"
         doc = json.load(open(_find(os.path.join("data", "wc2026_snapshot.json")), encoding="utf-8"))
-    played, remaining, as_of = _parse_openfootball(doc, idx)
-    return {"played": played, "remaining": remaining, "as_of": as_of, "source": source}
+    played, remaining, completed, as_of = _parse_openfootball(doc, idx)
+    return {
+        "played": played, "remaining": remaining, "completed": completed,
+        "as_of": as_of, "source": source,
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -458,6 +464,85 @@ def _leaderboards(sim, T):
 
 
 # --------------------------------------------------------------------------- #
+# Calibration: backtest the match model against completed games
+# --------------------------------------------------------------------------- #
+def _poisson_pmf(lmbda, kmax=10):
+    out = []
+    p = math.exp(-lmbda)
+    for k in range(kmax + 1):
+        out.append(p)
+        p *= lmbda / (k + 1)
+    return out
+
+
+def _match_probs(rh, ra):
+    """Analytic P(home win), P(draw), P(away win) from two independent Poissons."""
+    ph_goals = _poisson_pmf(float(_xg(rh - ra)))
+    pa_goals = _poisson_pmf(float(_xg(ra - rh)))
+    home = draw = away = 0.0
+    for i, pi in enumerate(ph_goals):
+        for j, pj in enumerate(pa_goals):
+            pij = pi * pj
+            if i > j:
+                home += pij
+            elif i == j:
+                draw += pij
+            else:
+                away += pij
+    return home, draw, away
+
+
+def _calibration(completed, idx, ratings):
+    """How the model's pre-match probabilities line up with actual results."""
+    n = len(completed)
+    if n == 0:
+        return {"n": 0}
+    correct = 0
+    brier = 0.0
+    fav_wins = fav_games = 0
+    BINS = 5
+    bin_pred = [0.0] * BINS
+    bin_act = [0.0] * BINS
+    bin_cnt = [0] * BINS
+    for h, a, hg, ag in completed:
+        rh, ra = ratings[idx[h]], ratings[idx[a]]
+        ph, pd, pa = _match_probs(rh, ra)
+        probs = (ph, pd, pa)
+        actual = 0 if hg > ag else (1 if hg == ag else 2)  # H / D / A
+        if max(range(3), key=lambda k: probs[k]) == actual:
+            correct += 1
+        y = [1.0 if actual == k else 0.0 for k in range(3)]
+        brier += sum((probs[k] - y[k]) ** 2 for k in range(3))
+        if rh != ra:
+            fav_games += 1
+            fav_is_home = rh > ra
+            if (fav_is_home and hg > ag) or (not fav_is_home and ag > hg):
+                fav_wins += 1
+        # reliability: bucket each outcome's predicted prob vs whether it happened
+        for k in range(3):
+            b = min(BINS - 1, int(probs[k] * BINS))
+            bin_pred[b] += probs[k]
+            bin_act[b] += y[k]
+            bin_cnt[b] += 1
+    buckets = [
+        {
+            "predicted": round(bin_pred[b] / bin_cnt[b], 4),
+            "actual": round(bin_act[b] / bin_cnt[b], 4),
+            "n": bin_cnt[b],
+        }
+        for b in range(BINS)
+        if bin_cnt[b] > 0
+    ]
+    return {
+        "n": n,
+        "accuracy": round(correct / n, 4),
+        "brier": round(brier / n, 4),
+        "favWinRate": round(fav_wins / fav_games, 4) if fav_games else None,
+        "buckets": buckets,
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Request handling + caching (shared by the Vercel handler and the dev server)
 # --------------------------------------------------------------------------- #
 DEFAULT_SIMS = 24000
@@ -548,6 +633,9 @@ def serve(params):
     if trends and not scenario:
         out["trends"] = trends
         out["meta"]["trendSince"] = since
+    # how the model has done so far + the daily odds history (pair-independent)
+    out["calibration"] = _calibration(state.get("completed", []), assets[3], assets[4])
+    out["history"] = _load_history()
     return out
 
 
@@ -566,8 +654,8 @@ if __name__ == "__main__":
     for rnd in ROUND_SEQ:
         if rnd in agg["pair"]["byRound"]:
             br = agg["pair"]["byRound"][rnd]
-            top_v = max(br["venues"].items(), key=lambda x: x[1]) if br["venues"] else ("?", 0)
-            print(f"  {rnd:4} {br['prob']*100:5.2f}%   top venue: {top_v[0]} ({top_v[1]*100:.2f}%)")
+            top = br["matches"][0] if br["matches"] else {"venue": "?", "date": "", "prob": 0}
+            print(f"  {rnd:4} {br['prob']*100:5.2f}%   {top['venue']} {top.get('date','')} (M{top.get('num','?')})")
     # sanity: group-win + a few title odds
     print("Canada win Group B:", round(agg["teams"]["Canada"]["groupWin"], 3),
           "| Portugal win Group K:", round(agg["teams"]["Portugal"]["groupWin"], 3))

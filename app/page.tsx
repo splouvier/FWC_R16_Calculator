@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import App from "@/components/App";
 import { TEAMS } from "@/lib/teams";
+import defaultSim from "@/data/default-sim.json";
+import type { SimResponse } from "@/lib/types";
 
 type SP = { [key: string]: string | string[] | undefined };
 
@@ -34,5 +36,7 @@ export async function generateMetadata({
 }
 
 export default function Page() {
-  return <App />;
+  // Precomputed default (Canada–Portugal), refreshed daily by the cron — lets the
+  // first paint show real numbers instantly without a cold serverless call.
+  return <App initialData={defaultSim as unknown as SimResponse} />;
 }
