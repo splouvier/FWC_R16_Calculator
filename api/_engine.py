@@ -729,9 +729,9 @@ def serve(params):
     if trends and not scenario:
         out["trends"] = trends
         out["meta"]["trendSince"] = since
-    # how the model has done so far + the daily odds history (pair-independent)
+    # how the model has done so far (the daily odds history is shipped statically
+    # via data/history.json, not in every response, to keep the payload lean)
     out["calibration"] = _calibration(state.get("completed", []), assets[3], assets[4])
-    out["history"] = _load_history()
     return out
 
 

@@ -77,7 +77,6 @@ export type SimResponse = {
   upcoming: Fixture[];
   trends?: Record<string, Trend>;
   calibration?: Calibration;
-  history?: HistorySnapshot[];
 };
 
 export type ForcedResult = { home: string; away: string; winner: string };

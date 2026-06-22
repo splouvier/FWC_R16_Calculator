@@ -5,6 +5,7 @@ import { meta, accentColor } from "@/lib/teams";
 import { pct, simulate } from "@/lib/api";
 import TrendArrow from "./TrendArrow";
 import Sparkline from "./Sparkline";
+import { titleSeries } from "@/lib/history";
 import type { Fixture, SimResponse } from "@/lib/types";
 
 type ScenarioRow = { label: string; groupWin: number; qualify: number };
@@ -32,9 +33,7 @@ export default function TeamDetail({
   const standing = data.standings[team];
   const accent = accentColor(team);
   const trend = data.trends?.[team];
-  const titleSeries = (data.history ?? [])
-    .map((s) => s.teams[team]?.title)
-    .filter((v): v is number => typeof v === "number");
+  const series = titleSeries(team);
 
   // The team's next group fixture, if any (drives the what-if scenarios).
   const next: Fixture | undefined = data.upcoming.find(
@@ -144,10 +143,10 @@ export default function TeamDetail({
             <span>Title {pct(stats?.title ?? 0, 1)}</span>
             <TrendArrow delta={trend?.title} />
           </div>
-          {titleSeries.length >= 2 && (
+          {series.length >= 2 && (
             <div className="mt-3">
               <div className="eyebrow text-[10px] text-mute mb-1">Title odds over time</div>
-              <Sparkline values={titleSeries} color={accent} width={150} height={36} />
+              <Sparkline values={series} color={accent} width={150} height={36} />
             </div>
           )}
         </div>
