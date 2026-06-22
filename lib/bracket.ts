@@ -1,5 +1,5 @@
 import bracketData from "@/data/bracket.json";
-import { GROUPS } from "./teams";
+import { GROUPS, TEAM_NAMES, effectiveRating } from "./teams";
 import type { TeamStats } from "./types";
 
 export type Slot =
@@ -168,4 +168,42 @@ export function seedR32(teams: Record<string, TeamStats>): Seed {
     if (m.round === "R32") seed[m.num] = { home: resolve(m.home), away: resolve(m.away) };
   }
   return seed;
+}
+
+/** The model's "chalk" bracket: advance the higher-rated team in every tie. */
+export function modelPicks(seed: Seed): Record<number, string> {
+  const picks: Record<number, string> = {};
+  const part = (m: KMatch, side: "home" | "away"): string | undefined => {
+    const f = m[side];
+    if (f.type === "winner_of") return picks[f.match];
+    return seed[m.num]?.[side];
+  };
+  for (const m of KO) {
+    if (m.round === "3P") continue;
+    const h = part(m, "home");
+    const a = part(m, "away");
+    if (!h || !a) continue;
+    picks[m.num] = effectiveRating(h) >= effectiveRating(a) ? h : a;
+  }
+  return picks;
+}
+
+/** Compact, shareable encoding of a set of bracket picks: "num.teamIdx-num.teamIdx". */
+export function encodePicks(picks: Record<number, string>): string {
+  return Object.entries(picks)
+    .map(([num, name]) => [num, TEAM_NAMES.indexOf(name)] as const)
+    .filter(([, idx]) => idx >= 0)
+    .map(([num, idx]) => `${num}.${idx}`)
+    .join("-");
+}
+
+export function decodePicks(str: string): Record<number, string> {
+  const out: Record<number, string> = {};
+  for (const part of str.split("-")) {
+    const [n, i] = part.split(".");
+    const num = parseInt(n, 10);
+    const name = TEAM_NAMES[parseInt(i, 10)];
+    if (!Number.isNaN(num) && name) out[num] = name;
+  }
+  return out;
 }
