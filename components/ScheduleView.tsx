@@ -198,6 +198,7 @@ function MatchRow({
         <Side name={m.team2} real={m.team2Real} right />
       </div>
       <div className="flex items-center gap-2 text-[11px] text-faint">
+        <span className="tnum text-[10px] font-bold text-mute shrink-0">M{m.num}</span>
         <span
           className="eyebrow text-[9px] px-1.5 py-0.5 rounded shrink-0"
           style={{ background: m.isKnockout ? "color-mix(in srgb, var(--accent-b) 25%, var(--panel))" : "var(--panel)" }}
