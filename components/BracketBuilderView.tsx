@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { meta, accentColor, TEAMS } from "@/lib/teams";
+import { meta, accentColor, effectiveRating, TEAMS } from "@/lib/teams";
 import { pct } from "@/lib/api";
 import { KO, seedR32, feedsInto, FINAL_NUM, type KMatch, type Slot } from "@/lib/bracket";
 import { ROUND_LABEL, type ReachByRound, type SimResponse } from "@/lib/types";
@@ -38,6 +38,7 @@ export default function BracketBuilderView({ data }: { data: SimResponse }) {
 
   const pick = (num: number, team: string) =>
     setPicks((prev) => {
+      if (prev[num] === team) return prev; // re-tapping the same winner: no-op (don't wipe downstream)
       const next = { ...prev, [num]: team };
       let cur = feedsInto(num); // changing a result invalidates everything downstream
       while (cur != null) {
@@ -56,7 +57,8 @@ export default function BracketBuilderView({ data }: { data: SimResponse }) {
     const h = participant(m, "home");
     const a = participant(m, "away");
     if (!h || !a || !TEAMS[h] || !TEAMS[a]) continue;
-    const fav = TEAMS[h].rating >= TEAMS[a].rating ? h : a;
+    // favourite = the team the model favours (effective rating incl. host bonus)
+    const fav = effectiveRating(h) >= effectiveRating(a) ? h : a;
     if (w === fav) chalk++;
     else upset++;
   }

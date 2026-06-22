@@ -49,3 +49,10 @@ __pycache__/
 
 # scratch/test scripts
 _*.mjs
+
+# iCloud/sync conflict copies (e.g. "App 2.tsx")
+* [0-9].ts
+* [0-9].tsx
+* [0-9].py
+* [0-9].json
+* [0-9].mjs

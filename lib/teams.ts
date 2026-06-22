@@ -29,6 +29,16 @@ export function meta(name: string): TeamMeta | undefined {
   return raw[name];
 }
 
+// Mirrors api/_engine.py: co-hosts get a small rating bump, so the "favourite"
+// shown in the UI matches the team the simulation actually favours.
+export const HOST_NATIONS = new Set(["Canada", "Mexico", "USA"]);
+export const HOST_BONUS = 0.07;
+export function effectiveRating(name: string): number {
+  const m = raw[name];
+  if (!m) return 0;
+  return m.rating + (HOST_NATIONS.has(name) ? HOST_BONUS : 0);
+}
+
 /** A readable accent: nudge near-white kits toward their secondary for contrast on dark. */
 export function accentColor(name: string): string {
   const m = raw[name];
