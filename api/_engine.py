@@ -58,25 +58,52 @@ def load_assets():
 # --------------------------------------------------------------------------- #
 # Live data: current standings + remaining group fixtures
 # --------------------------------------------------------------------------- #
+def _ko_winner(h, a, score):
+    """Winner of a decided knockout game: penalties → extra time → full time."""
+    for key in ("pen", "p", "ps"):  # penalty shootout decides
+        v = score.get(key)
+        if v and len(v) == 2 and v[0] != v[1]:
+            return h if v[0] > v[1] else a
+    et = score.get("et")  # after extra time
+    if et and len(et) == 2 and et[0] != et[1]:
+        return h if et[0] > et[1] else a
+    ft = score.get("ft")  # decided in 90'
+    if ft and len(ft) == 2 and ft[0] != ft[1]:
+        return h if ft[0] > ft[1] else a
+    return None
+
+
 def _parse_openfootball(doc, idx):
-    """Return (played_stats, remaining_fixtures, completed_results, as_of).
+    """Return (played_stats, remaining_fixtures, completed_results, ko_results, as_of).
 
     played_stats[name] = [pts, gf, ga]; remaining = list of (group, home, away);
-    completed = list of (home, away, hg, ag) for finished group games (for calibration).
+    completed = finished group games (home, away, hg, ag) for calibration;
+    ko_results = finished knockout games (match_num, winner_idx, loser_idx) — these
+    get pinned in the sim so it stops re-playing games that already happened.
     """
     played = {n: [0, 0, 0] for n in idx}
     remaining = []
     completed = []
+    ko_results = []
     as_of = None
-    for m in doc["matches"]:
+    for i, m in enumerate(doc["matches"]):
+        h, a = m["team1"], m["team2"]
+        score = m.get("score") or {}
         g = m.get("group")
         if not g:
+            # knockout match — pin it only once it's been played with real teams
+            if h in idx and a in idx:
+                win = _ko_winner(h, a, score)
+                if win:
+                    lose = a if win == h else h
+                    ko_results.append((i + 1, idx[win], idx[lose]))  # num == array pos + 1
+                    if m.get("date"):
+                        as_of = m["date"] if not as_of else max(as_of, m["date"])
             continue
         group = g.replace("Group ", "").strip()
-        h, a = m["team1"], m["team2"]
         if h not in idx or a not in idx:
             continue
-        ft = (m.get("score") or {}).get("ft")
+        ft = score.get("ft")
         if ft and len(ft) == 2:
             hg, ag = int(ft[0]), int(ft[1])
             played[h][1] += hg; played[h][2] += ag
@@ -92,7 +119,7 @@ def _parse_openfootball(doc, idx):
                 as_of = m["date"] if not as_of else max(as_of, m["date"])
         else:
             remaining.append((group, h, a))
-    return played, remaining, completed, as_of
+    return played, remaining, completed, ko_results, as_of
 
 
 def fetch_state(idx, timeout=6):
@@ -104,10 +131,10 @@ def fetch_state(idx, timeout=6):
     except Exception:
         source = "snapshot"
         doc = json.load(open(_find(os.path.join("data", "wc2026_snapshot.json")), encoding="utf-8"))
-    played, remaining, completed, as_of = _parse_openfootball(doc, idx)
+    played, remaining, completed, ko_results, as_of = _parse_openfootball(doc, idx)
     return {
         "played": played, "remaining": remaining, "completed": completed,
-        "as_of": as_of, "source": source,
+        "ko_results": ko_results, "as_of": as_of, "source": source,
     }
 
 
@@ -233,12 +260,23 @@ def simulate(N, scenario, assets, state, seed=778899):
             return loser_of[slot["match"]]
         raise ValueError(t)
 
+    # knockout games that have already been played get pinned to their real result
+    pinned = {num: (wi, li) for (num, wi, li) in state.get("ko_results", [])}
+
     round_rank = {"R32": 1, "R16": 2, "QF": 3, "SF": 4, "F": 5}
     final_home = final_away = None
     for k in ko:
-        home = resolve(k["home"]); away = resolve(k["away"])
-        w = _winner(rng, home, away, ratings[home], ratings[away])
-        l = np.where(w == home, away, home)
+        if k["num"] in pinned:
+            # real result: fix winner/loser deterministically across every sim
+            wi, li = pinned[k["num"]]
+            home = np.full(N, wi, dtype=np.int64)
+            away = np.full(N, li, dtype=np.int64)
+            w = home
+            l = away
+        else:
+            home = resolve(k["home"]); away = resolve(k["away"])
+            w = _winner(rng, home, away, ratings[home], ratings[away])
+            l = np.where(w == home, away, home)
         winner_of[k["num"]] = w; loser_of[k["num"]] = l
         if k["round"] != "3P":
             # meeting log carries match identity (num/venue/date) + the winner

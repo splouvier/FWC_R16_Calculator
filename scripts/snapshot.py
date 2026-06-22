@@ -30,10 +30,10 @@ KEEP_KEYS = ("title", "groupWin", "reachR16")
 
 
 def build_state_from_doc(doc, idx):
-    played, remaining, completed, as_of = E._parse_openfootball(doc, idx)
+    played, remaining, completed, ko_results, as_of = E._parse_openfootball(doc, idx)
     return {
         "played": played, "remaining": remaining, "completed": completed,
-        "as_of": as_of, "source": "file",
+        "ko_results": ko_results, "as_of": as_of, "source": "file",
     }
 
 
