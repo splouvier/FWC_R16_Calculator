@@ -83,13 +83,15 @@ export default function App({ initialData }: { initialData?: SimResponse }) {
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
-  // Keep the URL in sync so a given matchup/view is shareable.
+  // Keep the URL in sync so a given matchup/view is shareable. Preserve params
+  // we don't own (e.g. the Predict tab's ?bracket).
   useEffect(() => {
     if (!urlReady) return;
-    const p = new URLSearchParams();
+    const p = new URLSearchParams(window.location.search);
     p.set("a", teamA);
     p.set("b", teamB);
     if (view !== "simulate") p.set("view", view);
+    else p.delete("view");
     window.history.replaceState(null, "", `?${p.toString()}`);
   }, [teamA, teamB, view, urlReady]);
 
