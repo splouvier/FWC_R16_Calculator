@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 export type ViewKey =
   | "simulate"
   | "bracket"
   | "leaders"
   | "schedule"
   | "standings"
+  | "awards"
   | "about";
 
 const VIEWS: { key: ViewKey; label: string }[] = [
@@ -14,6 +17,7 @@ const VIEWS: { key: ViewKey; label: string }[] = [
   { key: "leaders", label: "Leaders" },
   { key: "schedule", label: "Schedule" },
   { key: "standings", label: "Standings" },
+  { key: "awards", label: "Awards" },
   { key: "about", label: "Method" },
 ];
 
@@ -24,9 +28,13 @@ export default function ViewSwitcher({
   view: ViewKey;
   onChange: (v: ViewKey) => void;
 }) {
+  const activeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ inline: "center", block: "nearest" });
+  }, [view]);
   return (
     <div
-      className="glass rounded-full p-1 flex w-full max-w-3xl mx-auto gap-0.5 overflow-x-auto no-scrollbar"
+      className="glass rounded-full p-1 flex w-full max-w-3xl mx-auto gap-0.5 overflow-x-auto no-scrollbar justify-start lg:justify-center"
       role="tablist"
     >
       {VIEWS.map((v) => {
@@ -34,10 +42,11 @@ export default function ViewSwitcher({
         return (
           <button
             key={v.key}
+            ref={active ? activeRef : undefined}
             role="tab"
             aria-selected={active}
             onClick={() => onChange(v.key)}
-            className={`flex-1 min-w-0 truncate display text-[10px] sm:text-sm rounded-full py-2 px-1 sm:px-2 tracking-tight sm:tracking-normal whitespace-nowrap transition-all ${
+            className={`shrink-0 display text-xs sm:text-sm rounded-full py-2 px-3 whitespace-nowrap transition-all ${
               active ? "text-ink" : "text-faint hover:text-mute"
             }`}
             style={

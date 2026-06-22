@@ -13,6 +13,7 @@ import StandingsView from "@/components/StandingsView";
 import BracketView from "@/components/BracketView";
 import LeadersView from "@/components/LeadersView";
 import ScheduleView from "@/components/ScheduleView";
+import AwardsView from "@/components/AwardsView";
 import AboutView from "@/components/AboutView";
 import { accentColor, TEAMS } from "@/lib/teams";
 import { simulate } from "@/lib/api";
@@ -70,6 +71,7 @@ export default function App({ initialData }: { initialData?: SimResponse }) {
       "leaders",
       "schedule",
       "standings",
+      "awards",
       "about",
     ];
     if (a && TEAMS[a]) setTeamA(a);
@@ -305,6 +307,8 @@ export default function App({ initialData }: { initialData?: SimResponse }) {
             {view === "schedule" && <ScheduleView teamA={teamA} teamB={teamB} />}
 
             {view === "standings" && (data ? <StandingsView data={data} /> : <LoadingHero />)}
+
+            {view === "awards" && <AwardsView />}
             {view === "about" && <AboutView data={data} />}
           </motion.div>
         </AnimatePresence>
