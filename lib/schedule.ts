@@ -49,6 +49,20 @@ export function prettySlot(code: string): string {
   return code;
 }
 
+/** Parse a match's venue-local "HH:MM UTC-N" kickoff into an absolute instant. */
+export function matchInstant(m: SMatch): Date | null {
+  if (!m.date || !m.time) return null;
+  const t = m.time.match(/^(\d{1,2}):(\d{2})\s*UTC([+-]\d{1,2})(?::(\d{2}))?/);
+  if (!t) return null;
+  const [, hh, mm, oh, om] = t;
+  const off = parseInt(oh, 10);
+  const sign = off < 0 ? "-" : "+";
+  const oa = String(Math.abs(off)).padStart(2, "0");
+  const ob = (om ?? "00").padStart(2, "0");
+  const d = new Date(`${m.date}T${hh.padStart(2, "0")}:${mm}:00${sign}${oa}:${ob}`);
+  return isNaN(d.getTime()) ? null : d;
+}
+
 let cached: SMatch[] | null = null;
 
 export function getSchedule(): SMatch[] {
