@@ -2,6 +2,7 @@ import snapshot from "@/data/wc2026_snapshot.json";
 import { TEAMS } from "./teams";
 
 export type SMatch = {
+  num: number; // FIFA match number (canonical order); knockout feeders reference these
   date: string;
   time: string;
   roundLabel: string; // "Group B" or "Round of 16" etc.
@@ -69,7 +70,7 @@ export function getSchedule(): SMatch[] {
   if (cached) return cached;
   const raw = (snapshot as { matches: RawMatch[] }).matches ?? [];
   cached = raw
-    .map((m): SMatch => {
+    .map((m, i): SMatch => {
       const isKo = !!m.round && KO_ROUNDS.has(m.round);
       const roundLabel = m.group
         ? m.group
@@ -78,6 +79,7 @@ export function getSchedule(): SMatch[] {
           : m.round ?? "";
       const ft = m.score?.ft;
       return {
+        num: i + 1, // canonical FIFA match number (matches bracket + engine)
         date: m.date ?? "",
         time: m.time ?? "",
         roundLabel,
